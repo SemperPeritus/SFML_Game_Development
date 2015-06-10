@@ -58,6 +58,7 @@ void Game::processEvent() {
     }
 }
 
+
 void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
     switch (key) {
         case sf::Keyboard::W:
