@@ -15,6 +15,12 @@ namespace Textures {
     };
 }
 
+namespace Fonts {
+    enum ID {
+        Sansation,
+    };
+}
+
 
 class Game {
 public:
@@ -23,9 +29,15 @@ public:
 
 private:
     sf::RenderWindow window;
+    int width;
+    int height;
 
     sf::Sprite player;
     sf::Sprite landscape;
+
+    sf::Font sansation;
+
+    sf::Text psCounters;
 
     static const sf::Time TimePerFrame;
     static const float PlayerSpeed;
@@ -33,6 +45,7 @@ private:
     bool shouldExit;
 
     ResourceHolder<sf::Texture, Textures::ID> textures;
+    ResourceHolder<sf::Font, Fonts::ID> fonts;
 
     int exitCode;
 
@@ -43,6 +56,8 @@ private:
 
     void initVariables();
     void loadTextures();
+    void loadFonts();
+    void initTexts();
 
     void processEvent();
     void handlePlayerInput(sf::Keyboard::Key key, bool isPressed);

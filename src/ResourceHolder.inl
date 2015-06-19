@@ -32,15 +32,23 @@ void ResourceHolder<Resource, Identifier>::load(Identifier id, const std::string
 
 template <typename Resource, typename Identifier>
 Resource &ResourceHolder<Resource, Identifier>::get(Identifier id) {
-    auto found = resourceMap.find(id);
-    assert(found != resourceMap.end());
-    return *found->second;
+    #ifndef NDEBUG
+        auto found = resourceMap.find(id);
+        assert(found != resourceMap.end());
+        return *found->second;
+    #else
+        return *resourceMap.find(id)->second;
+    #endif
 }
 
 
 template <typename Resource, typename Identifier>
 const Resource &ResourceHolder<Resource, Identifier>::get(Identifier id) const {
-    auto found = resourceMap.find(id);
-    assert(found != resourceMap.end());
-    return *found->second;
+    #ifndef NDEBUG
+        auto found = resourceMap.find(id);
+        assert(found != resourceMap.end());
+        return *found->second;
+    #else
+        return *resourceMap.find(id)->second;
+    #endif
 }

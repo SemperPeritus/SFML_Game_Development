@@ -6,26 +6,32 @@ const float Game::PlayerSpeed = 100.f;
 
 
 Game::Game(): window(sf::VideoMode(640, 480), "SFML Game Development"),
-              textures("img/textures/") {
+              textures("img/textures/"), fonts("fonts/") {
     initVariables();
     loadTextures();
+    loadFonts();
+    initTexts();
 }
 
 
-void Game::initVariables() {
+inline void Game::initVariables() {
+    width = window.getSize().x;
+    height = window.getSize().y;
+
+    shouldExit = false;
+    exitCode = EXIT_SUCCESS;
+
     isMovingUp = false;
     isMovingDown = false;
     isMovingLeft = false;
     isMovingRight = false;
-
-    shouldExit = false;
-    exitCode = EXIT_SUCCESS;
 }
 
 
-void Game::loadTextures() {
+inline void Game::loadTextures() {
     try {
         textures.load(Textures::Airplane, "eagle.png");
+        textures.get(Textures::Airplane).setSmooth(true);
         textures.load(Textures::Desert, "desert.png");
     }
     catch (std::runtime_error& e) {
@@ -40,18 +46,62 @@ void Game::loadTextures() {
 }
 
 
+inline void Game::loadFonts() {
+    fonts.load(Fonts::Sansation, "sansation.ttf");
+
+    sansation = fonts.get(Fonts::Sansation);
+}
+
+
+inline void Game::initTexts() {
+    psCounters.setFont(sansation);
+    psCounters.setColor(sf::Color::White);
+    psCounters.setCharacterSize(24);
+    psCounters.setStyle(sf::Text::Bold);
+    psCounters.setString("120\n60");
+    psCounters.setPosition(width - 60, 5);
+}
+
+
 int Game::run() {
+    // Delta time per frames
     sf::Clock clock;
     sf::Time deltaTime = sf::Time::Zero;
+    // PS counters
+    int framesPerTime = 0;
+    int updatesPerTime = 0;
+    sf::Int64 renderTime = 0;
+    sf::Int64 updateTime = 0;
 
     // Game loop
     while (window.isOpen() && !shouldExit) {
+        // Delta time per frames
         deltaTime += clock.restart();
+        updateTime += deltaTime.asMicroseconds();
+        updatesPerTime++;
+
+        // Updating game states
         while (deltaTime > TimePerFrame) {
+            // PS counters
+            renderTime += deltaTime.asMicroseconds();
+            framesPerTime++;
+            // Updating states
             deltaTime -= TimePerFrame;
             processEvent();
             update(TimePerFrame);
         }
+
+        // PS counters
+        if (updatesPerTime >= 10 && framesPerTime >= 10) {
+            psCounters.setString(std::to_string(updatesPerTime * 1000000 / updateTime) + "\n" +
+                                         std::to_string(framesPerTime * 1000000 / renderTime));
+            updatesPerTime = 0;
+            framesPerTime = 0;
+            updateTime = 0;
+            renderTime = 0;
+        }
+
+        // Rendering
         render();
     }
 
@@ -117,8 +167,12 @@ void Game::update(sf::Time elapsedTime) {
 
 void Game::render() {
     window.clear();
+
     window.draw(landscape);
     window.draw(player);
+
+    window.draw(psCounters);
+
     window.display();
 }
 
