@@ -5,13 +5,10 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f/60.f);
 const float Game::PlayerSpeed = 100.f;
 
 
-Game::Game(): window(sf::VideoMode(640, 480), "SFML Game Development"), player(),texture() {
+Game::Game(): window(sf::VideoMode(640, 480), "SFML Game Development"),
+              textures("img/textures/") {
     initVariables();
-
-    if (!texture.loadFromFile("img/sprites/eagle.png"))
-        window.close();
-    player.setTexture(texture);
-    player.setPosition(100.f, 100.f);
+    loadTextures();
 }
 
 
@@ -20,14 +17,35 @@ void Game::initVariables() {
     isMovingDown = false;
     isMovingLeft = false;
     isMovingRight = false;
+
+    shouldExit = false;
+    exitCode = EXIT_SUCCESS;
 }
 
 
-void Game::run() {
+void Game::loadTextures() {
+    try {
+        textures.load(Textures::Airplane, "eagle.png");
+        textures.load(Textures::Desert, "desert.png");
+    }
+    catch (std::runtime_error& e) {
+        std::cout << "Exception: " << e.what() << std::endl;
+        exitCode = EXIT_FAILURE;
+        shouldExit = true;
+    }
+
+    player = sf::Sprite(textures.get(Textures::Airplane));
+    player.setPosition(200.f, 200.f);
+    landscape = sf::Sprite(textures.get(Textures::Desert));
+}
+
+
+int Game::run() {
     sf::Clock clock;
     sf::Time deltaTime = sf::Time::Zero;
 
-    while (window.isOpen()) {
+    // Game loop
+    while (window.isOpen() && !shouldExit) {
         deltaTime += clock.restart();
         while (deltaTime > TimePerFrame) {
             deltaTime -= TimePerFrame;
@@ -36,6 +54,10 @@ void Game::run() {
         }
         render();
     }
+
+    clearUp();
+
+    return exitCode;
 }
 
 
@@ -95,6 +117,13 @@ void Game::update(sf::Time elapsedTime) {
 
 void Game::render() {
     window.clear();
+    window.draw(landscape);
     window.draw(player);
     window.display();
+}
+
+
+void Game::clearUp() {
+    if (window.isOpen())
+        window.close();
 }

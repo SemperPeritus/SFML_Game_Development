@@ -3,7 +3,7 @@
 
 int main() {
     Game game;
-    game.run();
+    int exitCode = game.run();
 
-    return 0;
+    return exitCode;
 }
